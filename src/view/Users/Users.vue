@@ -44,15 +44,15 @@
     </el-card>
 
     <!-- 添加用户的对话框 -->
-    <el-dialog title="添加用户" :visible.sync="addDialogVisible" width="30%">
+    <el-dialog title="添加用户" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
 
       <!--  内容主题区域 -->
-      <el-form :model="addForm" :rules="addFormrules" ref="addFormRef" label-width="90px">
+      <el-form :model="addForm" :rules="addFormrules" ref="addFormRef" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="addForm.username"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="addForm.password"></el-input>
+          <el-input v-model="addForm.password" type="password"></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="addForm.email"></el-input>
@@ -65,7 +65,7 @@
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
         <el-button @click="addDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addDialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="addUser">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -74,6 +74,24 @@
 <script>
 export default {
   data () {
+
+    /* 自定义校验规则 */
+    var checkEmail = (rule, value, cb) => {
+      const regEmail = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]\.[a-zA-Z0-9_-]+$/
+      if (regEmail.test(value)) {
+        return cb()
+      }
+      cb(new Error('请输入合法的邮箱'))
+    }
+
+    var checkMobile = (rule, value, cb) => {
+      const regMobile = /^1[3456789]\d{9}$/
+      if (regMobile.test(value)) {
+        return cb()
+      }
+      cb(new Error('请输入合法的手机号'))
+    }
+
     return {
       queryInfo: {
         query: '',
@@ -96,9 +114,11 @@ export default {
         ],
         email: [
           { required: true, message: '邮箱不能为空', trigger: 'blur' },
+          { validator: checkEmail, trigger: 'blur' }
         ],
         mobile: [
           { required: true, message: '电话不能为空', trigger: 'blur' },
+          { validator: checkMobile, trigger: 'blur' }
         ],
       },
       // 添加user的表单数据
@@ -141,6 +161,31 @@ export default {
       } else {
         this.$message.success('更新用户状态成功')
       }
+    },
+
+    // 监听添加用户对话框的关闭事件
+    addDialogClosed () {
+      this.$refs.addFormRef.resetFields()
+    },
+    // 添加用户
+    addUser () {
+      this.$refs.addFormRef.validate(async valid => {
+        if (valid) {
+          return
+        } else {
+          const { data: res } = await this.$http.post('/users', this.adForm)
+          if (res.meta.status !== 201) {
+            this.$message.error('添加用户失败')
+          } else {
+            this.$message.success('添加用户成功')
+          }
+        }
+      })
+
+      this.addDialogVisible = false
+      // 重新获取用户列表
+      this.getUserList()
+
     }
   },
 
