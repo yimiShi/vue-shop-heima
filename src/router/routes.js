@@ -4,6 +4,7 @@ import Welcome from '../view/Welcome/Welcome.vue'
 import Users from '../view/Users/Users.vue'
 import Rights from '../view/Power/Rights.vue'
 import Roles from '../view/Power/Roles.vue'
+import Cate from '../view/Goods/Cate.vue'
 
 
 export default [
@@ -17,6 +18,7 @@ export default [
       { path: '/users', component: Users },
       { path: '/rights', component: Rights },
       { path: '/roles', component: Roles },
+      { path: '/categories', component: Cate },
 
     ]
   }
