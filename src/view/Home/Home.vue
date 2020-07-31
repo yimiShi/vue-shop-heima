@@ -33,7 +33,6 @@
 
       </el-aside>
       <el-main>
-        <BreadCrumb v-if="$route.path !== '/welcome'"></BreadCrumb>
         <router-view></router-view>
       </el-main>
     </el-container>
@@ -41,7 +40,6 @@
 </template>
 
 <script>
-import BreadCrumb from '../../components/BreadCrumb/BreadCrumb'
 export default {
   data () {
     return {
@@ -88,11 +86,8 @@ export default {
       sessionStorage.setItem('activePath', "/" + activePath)
       this.activePath = "/" + activePath
     }
-  },
-
-  components: {
-    BreadCrumb
   }
+
 }
 </script>
 

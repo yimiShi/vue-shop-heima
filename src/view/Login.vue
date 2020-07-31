@@ -41,8 +41,8 @@ export default {
     return {
       // 登陆表单数据对象
       loginForm: {
-        username: '',
-        password: '',
+        username: 'admin',
+        password: '123456',
       },
       LoginRules: {
         username: [
@@ -76,6 +76,8 @@ export default {
         if (!valid) return
 
         const { data: res } = await this.$http.post('login', this.loginForm)
+        // const res = await this.$http.post('login', this.loginForm)
+        // console.log(res);
         if (res.meta.status !== 200) {
           return this.$message.error('登陆失败')
         } else {

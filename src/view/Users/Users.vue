@@ -1,5 +1,6 @@
 <template>
   <div>
+    <BreadCrumb :pathList="['用户管理', '用户列表']" />
     <el-card class="box-card">
       <!-- 搜索与添加区域 -->
       <el-row :gutter="20">
@@ -32,7 +33,8 @@
             <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeUserinfo(scope.row.id)">
             </el-button>
             <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              <el-button type="warning" icon="el-icon-setting" size="mini" @click="setRoleRights(scope.row)">
+              </el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -82,7 +84,6 @@
           <el-input v-model="editForm.mobile" maxlength="11"></el-input>
         </el-form-item>
       </el-form>
-
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
         <el-button @click="editDialogVisible = false">取 消</el-button>
@@ -90,10 +91,31 @@
       </span>
     </el-dialog>
 
+    <!-- 分配角色的对话框 -->
+    <el-dialog title="分配角色" :visible.sync="setRoleDialogVisible" width="50%" @close="setRoleDialogClosed">
+      <div>
+        <p>当前用户: {{userInfo.username}}</p>
+        <p>当前角色: {{userInfo.role_name}}</p>
+        <p>分配新角色:
+          <el-select v-model="selectedRoleId" placeholder="请选择">
+            <el-option v-for="item in rolesList" :key="item.id" :label="item.roleName" :value="item.id">
+            </el-option>
+          </el-select>
+        </p>
+
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
+import BreadCrumb from '../../components/BreadCrumb/BreadCrumb'
+
 export default {
   data () {
 
@@ -166,11 +188,20 @@ export default {
           { required: true, message: '电话不能为空', trigger: 'blur' },
           { validator: checkMobile, trigger: 'blur' }
         ],
-      }
+      },
+
+      // 分配角色对话框的显示与隐藏
+      setRoleDialogVisible: false,
+      userInfo: {},
+
+      // 所有的角色列表
+      rolesList: [],
+      // 选中的角色id
+      selectedRoleId: ''
+
     }
   },
   created () {
-    console.log('created>..', this.addForm);
     this.getUserList()
   },
   methods: {
@@ -219,11 +250,10 @@ export default {
           this.$message.error(res.meta.msg)
         } else {
           this.$message.success('添加用户成功')
-          this.addDialogVisible = false
-
           // 重新获取用户列表
           this.getUserList()
         }
+        this.addDialogVisible = false
       })
     },
 
@@ -295,8 +325,41 @@ export default {
         }
       }
 
+    },
+
+    // 为用户分配角色 , 打开对话框
+    async setRoleRights (userInfo) {
+
+      this.userInfo = userInfo
+
+      // 展示对话框之前, 获取所有的权限
+      const { data: res } = await this.$http.get('/roles')
+      this.rolesList = res.data
+      this.setRoleDialogVisible = true
+    },
+
+    // 点击确认, 分配角色
+    async saveRoleInfo () {
+      if (!this.selectedRoleId) {
+        return this.$message.error('请选择要分配的角色')
+      }
+
+      const { data: res } = await this.$http.put(`/users/${this.userInfo.id}/role`, { rid: this.selectedRoleId })
+      this.$message.success(res.meta.msg)
+      this.getUserList()
+      this.setRoleDialogVisible = false
+    },
+
+    // 监听分配角色对话框的关闭事件
+    setRoleDialogClosed () {
+      this.selectedRoleId = ''
+      this.userInfo = {}
     }
   },
+
+  components: {
+    BreadCrumb
+  }
 
 }
 </script>
