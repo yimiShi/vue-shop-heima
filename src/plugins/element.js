@@ -27,7 +27,10 @@ import {
   Tree,
   Select,
   Option,
-  Cascader
+  Cascader,
+  Alert,
+  Tabs,
+  TabPane
 } from "element-ui"
 
 // Vue.prototype.$ELEMENT = { size: 'small', zIndex: 3000 };
@@ -59,6 +62,9 @@ Vue.use(Tree)
 Vue.use(Select)
 Vue.use(Option)
 Vue.use(Cascader)
+Vue.use(Alert)
+Vue.use(Tabs)
+Vue.use(TabPane)
 
 
 Vue.prototype.$message = Message
