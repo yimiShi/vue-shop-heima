@@ -32,10 +32,11 @@
             <el-table-column type="index" label="#"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
-              <template>
-                <el-button type="primamry" icon="el-icon-edit" size="mini" @click="showEditDialog">编辑
+              <template slot-scope="scope">
+                <el-button type="primamry" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.attr_id)">编辑
                 </el-button>
-                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+                <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeParams(scope.row.attr_id)">删除
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -49,11 +50,12 @@
             <el-table-column type="index" label="#"></el-table-column>
             <el-table-column label="属性名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
-              <template>
-                <el-button type="primamry" icon="el-icon-edit" size="mini" @click="showEditDialog">编辑
+              <template slot-scope="scope">
+                <el-button type="primamry" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.attr_id)">编辑
                 </el-button>
 
-                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+                <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeParams(scope.row.attr_id)">删除
+                </el-button>
               </template>
 
             </el-table-column>
@@ -210,11 +212,46 @@ export default {
       this.editDialogVisible = false
     },
 
-    showEditDialog () {
+    async showEditDialog (attr_id) {
+
+      // 查询当前参数的信息
+      const { data: res } = await this.$http.get(`/categories/${this.cateId}/attributes/${attr_id}`,
+        { params: { attr_sel: this.activeName } })
+
+      this.editForm = res.data
+
       this.editDialogVisible = true
     },
-    editParams () {
 
+    // 点击按钮, 修改参数信息
+    editParams () {
+      this.$refs.editFormRef.validate(async valid => {
+        if (!valid) return
+        const { data: res } = await this.$http.put(`categories/${this.cateId}/attributes/${this.editForm.attr_id}`, { attr_name: this.editForm.attr_name, attr_sel: this.activeName })
+
+        this.$message.success(res.meta.msg)
+        this.getParamsData()
+        this.editDialogVisible = false
+      })
+    },
+
+    // 根据id删除对应的参数
+    async removeParams (attr_id) {
+      const confirmResult = await this.$confirm('是否删除该参数?', '删除参数',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).catch(err => err)
+      if (confirmResult !== 'confirm') {
+        this.$message.info('取消了删除')
+      } else {
+
+        // 请求后台, 删除cateid下面的参数
+        await this.$http.delete(`categories/${this.cateId}/attributes/${attr_id}`)
+
+        this.getParamsData()
+      }
     }
 
 
