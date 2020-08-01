@@ -29,6 +29,23 @@
 
           <!-- 动态参数表格 -->
           <el-table :data="manyTableData" border stripe>
+            <!-- 展开行 -->
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <!-- 循环渲染tag标签 -->
+                <el-tag v-for="(item, index) in scope.row.attr_vals" :key="index" closable>
+                  {{item}}
+                </el-tag>
+
+                <!-- 新增tag -->
+                <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue"
+                  ref="saveTagInput" size="small" @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
+                </el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(cope.row)">+ New Tag</el-button>
+              </template>
+
+            </el-table-column>
+            <!-- 索引列 -->
             <el-table-column type="index" label="#"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
@@ -41,6 +58,7 @@
             </el-table-column>
           </el-table>
         </el-tab-pane>
+
         <el-tab-pane label="静态属性" name="only">
           <el-button type="primary" size="mini" :disabled="isBtnDisabled" @click="addDialogVisible=true">添加属性
           </el-button>
@@ -146,7 +164,6 @@ export default {
         ]
       },
 
-
     }
   },
   created () {
@@ -177,6 +194,14 @@ export default {
       } else {
         // 发送请求, 获取当前cate id对应的参数
         const { data: res } = await this.$http.get(`/categories/${this.cateId}/attributes`, { params: { sel: this.activeName } })
+
+        // 参数的选项变为列表
+        res.data.forEach(item => {
+          item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : ''
+          // 为每个cate增加属性.新增tag时使用
+          item.inputVisible = false
+          item.inputValue = ''
+        })
 
         if (this.activeName === 'many') {
           this.manyTableData = res.data
@@ -252,6 +277,15 @@ export default {
 
         this.getParamsData()
       }
+    },
+
+    // 新增tag, 按下enter或失去焦点触发
+    handleInputConfirm () {
+
+    },
+    // 新增tag, 按下button, 展示文本输入框
+    showInput () {
+      this.inputVisible = true
     }
 
 
@@ -281,5 +315,11 @@ export default {
 <style lang="less" scoped>
 .cat_opt {
   margin: 15px 0;
+}
+.el-tag {
+  margin: 10px;
+}
+.input-new-tag {
+  width: 120px;
 }
 </style>
