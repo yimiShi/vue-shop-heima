@@ -12,7 +12,7 @@
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary">添加商品</el-button>
+          <el-button type="primary" @click="goAddPage">添加商品</el-button>
         </el-col>
       </el-row>
 
@@ -89,13 +89,17 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).catch(err => err)
-
       if (confirmResult !== 'confirm') {
         this.$message.info('取消了删除')
       } else {
         await this.$http.delete('/goods/' + id)
         this.getGoodsList()
       }
+    },
+
+    // 点击跳转到添加商品页面
+    goAddPage () {
+      this.$router.push('/goods/add')
     }
 
   }

@@ -7,6 +7,7 @@ import Roles from '../view/Power/Roles.vue'
 import Cate from '../view/Goods/Cate.vue'
 import Params from '../view/Goods/Params.vue'
 import GoodsList from '../view/Goods/List.vue'
+import AddGood from '../view/Goods/Add.vue'
 
 
 export default [
@@ -23,6 +24,7 @@ export default [
       { path: '/categories', component: Cate },
       { path: '/params', component: Params },
       { path: '/goods', component: GoodsList },
+      { path: '/goods/add', component: AddGood },
 
     ]
   }
