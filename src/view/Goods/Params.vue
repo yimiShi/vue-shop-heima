@@ -222,7 +222,7 @@ export default {
 
         // 参数的选项变为列表
         res.data.forEach(item => {
-          item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : ''
+          item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
           // 为每个cate增加属性.新增tag时使用
           item.inputVisible = false
           item.inputValue = ''
