@@ -33,7 +33,8 @@
             <el-table-column type="expand">
               <template slot-scope="scope">
                 <!-- 循环渲染tag标签 -->
-                <el-tag v-for="(item, index) in scope.row.attr_vals" :key="index" closable>
+                <el-tag v-for="(item, index) in scope.row.attr_vals" :key="index" closable
+                  @close="handleColse(index,scope.row)">
                   {{item}}
                 </el-tag>
 
@@ -45,8 +46,8 @@
                 <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag
                 </el-button>
               </template>
-
             </el-table-column>
+
             <!-- 索引列 -->
             <el-table-column type="index" label="#"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
@@ -67,6 +68,25 @@
 
           <!-- 静态参数表格 -->
           <el-table :data="onlyTableData" border stripe>
+            <!-- 展开行 -->
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <!-- 循环渲染tag标签 -->
+                <el-tag v-for="(item, index) in scope.row.attr_vals" :key="index" closable
+                  @close="handleColse(index,scope.row)">
+                  {{item}}
+                </el-tag>
+
+                <!-- 新增tag -->
+                <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue"
+                  ref="saveTagInput" size="small" @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)">
+                </el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag
+                </el-button>
+              </template>
+            </el-table-column>
+
             <el-table-column type="index" label="#"></el-table-column>
             <el-table-column label="属性名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
@@ -180,6 +200,7 @@ export default {
 
     // 级联选择框变化时触发的事件
     handleChange () {
+
       this.getParamsData()
     },
 
@@ -193,6 +214,8 @@ export default {
       // 只能选择第3级的商品, 进行参数设置
       if (this.selected_keys.length != 3) {
         this.selected_keys = []
+        this.manyTableData = []
+        this.onlyTableData = []
       } else {
         // 发送请求, 获取当前cate id对应的参数
         const { data: res } = await this.$http.get(`/categories/${this.cateId}/attributes`, { params: { sel: this.activeName } })
@@ -294,7 +317,13 @@ export default {
       row.inputValue = ''
       row.inputVisble = false
       // 2.向后台发送请求, 进行保存
-      this.$http.put(`categories/${this.cateId}/attributes/${row.attr_id}`, {
+      this.saveAttrVals(row)
+
+    },
+
+    // 向后台发送请求, 进行保存
+    async saveAttrVals (row) {
+      await this.$http.put(`categories/${this.cateId}/attributes/${row.attr_id}`, {
         attr_name: row.attr_name,
         attr_sel: row.attr_sel,
         attr_vals: row.attr_vals.join(' ')
@@ -308,6 +337,12 @@ export default {
       this.$nextTick(() => {
         this.$refs.saveTagInput.$refs.input.focus()
       })
+    },
+
+    // 删除对应参数的可选项 -- tag
+    handleColse (index, row) {
+      row.attr_vals.splice(index, 1)
+      this.saveAttrVals(row)
     }
 
 
