@@ -6,6 +6,7 @@ import Rights from '../view/Power/Rights.vue'
 import Roles from '../view/Power/Roles.vue'
 import Cate from '../view/Goods/Cate.vue'
 import Params from '../view/Goods/Params.vue'
+import GoodsList from '../view/Goods/List.vue'
 
 
 export default [
@@ -21,6 +22,7 @@ export default [
       { path: '/roles', component: Roles },
       { path: '/categories', component: Cate },
       { path: '/params', component: Params },
+      { path: '/goods', component: GoodsList },
 
     ]
   }

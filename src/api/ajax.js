@@ -14,7 +14,7 @@ axios.interceptors.request.use(config => {
 
 axios.interceptors.response.use(response => {
   const { status, msg } = response.data.meta
-  if (200 <= status < 300) {
+  if (200 <= Number(status) && Number(status) < 300) {
     return response
   }
   Message.error(msg)
