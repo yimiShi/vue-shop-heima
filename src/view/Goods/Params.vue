@@ -39,9 +39,11 @@
 
                 <!-- 新增tag -->
                 <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue"
-                  ref="saveTagInput" size="small" @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
+                  ref="saveTagInput" size="small" @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)">
                 </el-input>
-                <el-button v-else class="button-new-tag" size="small" @click="showInput(cope.row)">+ New Tag</el-button>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag
+                </el-button>
               </template>
 
             </el-table-column>
@@ -279,13 +281,33 @@ export default {
       }
     },
 
-    // 新增tag, 按下enter或失去焦点触发
-    handleInputConfirm () {
+    // 新增tag, 按下enter或失去焦点触发, 向后台请求添加tag
+    handleInputConfirm (row) {
+      if (row.inputValue.trim().length === 0) {
+        row.inputValue = ''
+        row.inputVisible = false
+        return
+      }
 
+      // 1. 输入了合法内容, 重新渲染页面
+      row.attr_vals.push(row.inputValue.trim())
+      row.inputValue = ''
+      row.inputVisble = false
+      // 2.向后台发送请求, 进行保存
+      this.$http.put(`categories/${this.cateId}/attributes/${row.attr_id}`, {
+        attr_name: row.attr_name,
+        attr_sel: row.attr_sel,
+        attr_vals: row.attr_vals.join(' ')
+      })
+      this.$message.success('修改参数项成功')
     },
     // 新增tag, 按下button, 展示文本输入框
-    showInput () {
-      this.inputVisible = true
+    showInput (cate) {
+      cate.inputVisible = true
+      // 页面数据改变. 页面改变后, 文本框自动获得焦点
+      this.$nextTick(() => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
     }
 
 

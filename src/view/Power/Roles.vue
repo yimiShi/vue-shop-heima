@@ -130,6 +130,7 @@ export default {
 
       // 再次获取角色列表
       // this.getRolesList()
+      // 这样做不需要重新加载整个页面
       role.children = res.data
     },
 
